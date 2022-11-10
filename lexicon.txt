@@ -590,7 +590,6 @@ bizarre
 bizarrement
 bizarres
 bière
-blabla
 blague
 blagues
 blanc
@@ -985,6 +984,7 @@ chinoise
 chiottes
 chirurgien
 choc
+chocolat
 choeur
 choisi
 choisie
@@ -1407,7 +1407,6 @@ croisière
 croisé
 croit
 croix
-croquette
 croyais
 croyait
 croyez
@@ -1472,7 +1471,6 @@ danseur
 danseuse
 date
 davantage
-david
 de
 debout
 dedans
@@ -2004,7 +2002,6 @@ essayé
 essence
 essentiel
 est
-esteban
 estime
 estomac
 et
@@ -2973,7 +2970,6 @@ loi
 loin
 lointain
 lois
-lol
 long
 longs
 longtemps
@@ -3138,7 +3134,6 @@ masses
 match
 matelas
 mater
-mathias
 matin
 matins
 matinée
@@ -3431,7 +3426,6 @@ ni
 nichons
 nid
 nier
-nina
 niveau
 nièce
 noble
@@ -3577,7 +3571,6 @@ opérer
 or
 orage
 orange
-oranger
 orchestre
 ordinaire
 ordinaires
@@ -3600,9 +3593,6 @@ origine
 origines
 orteils
 os
-oscar
-oscar
-oscar
 ose
 osé
 ou
@@ -3616,7 +3606,6 @@ oubliez
 oublié
 oubliée
 ouest
-ouganda
 oui
 ours
 outils
@@ -5974,6 +5963,7 @@ zéro
 étonnerait
 étouffe
 étouffer
+étrange
 étranger
 étrangers
 étranges
@@ -5993,6 +5983,7 @@ zéro
 évidence
 évident
 évite
+éviter
 évolution
 événement
 événements

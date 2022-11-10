@@ -1,8 +1,5 @@
 import math
-import random
 import string
-
-
 
 def load_lexicon(path: str = "lexicon.txt", mode: str = "r") -> list:
     """
@@ -41,41 +38,42 @@ def len_prefixe(mot1: str, mot2: str) -> int:
 
 
 def jaro(mot1, mot2):
-
     # Determination de m
     liste_mot = []
     formule = math.floor(max(len(mot1), len(mot2)) / 2) - 1
 
-    check_mot1 = [False] * len(mot1)
+    check_mot1 = [False] * len(mot1)# On veut éviter de compter 2 fois les mêmes élements
     for i in range(len(mot1)):
         for j in range(len(mot2)):
-            # print(mot1[i],mot2[j],check_mot1)
+            #print(mot1[i],mot2[j],check_mot1)
             if mot1[i] == mot2[j] and abs(i - j) <= formule and check_mot1[i] == False:
                 liste_mot.append(mot1[i])
                 check_mot1[i] = True
-    #m = len(liste_mot)
+            
 
     # Transpositions
     liste_mot_mot1 = []
     liste_mot_mot2 = []
     for i in mot1:
-        if i in liste_mot:
+        if i in liste_mot:# and not(i in liste_mot_mot1):
             liste_mot_mot1.append(i)
 
     for i in mot2:
-        if i in liste_mot:
+        if i in liste_mot:#: and not(i in liste_mot_mot2):
             liste_mot_mot2.append(i)
             
-    m=min(len(liste_mot_mot1),len(liste_mot_mot2))
+
+            
+    m=min(len(liste_mot_mot1),len(liste_mot_mot2))# On prend le minimum pour éviter les erreurs d'indices
     t = 0
-    #print(liste_mot, liste_mot_mot1, liste_mot_mot2)
-    for i in range(min(len(liste_mot_mot1),len(liste_mot_mot2))):
+    for i in range(m):
         if (
             liste_mot_mot1[i] != liste_mot_mot2[i]
-        ):  # meme probleme il faut des true false
+        ): 
             t += 1
 
-    # return liste_mot_mot1,liste_mot_mot2,m,t//2
+
+    #return liste_mot_mot1,liste_mot_mot2,liste_mot,m,t//2
     if m == 0:
         return 0
     #print(f"1 / 3 * ({m} / {len(mot1)} + {m} / {len(mot2)} + ({m} - {t//2}) / {m})")
@@ -89,15 +87,14 @@ def jaro(mot1, mot2):
 #assert jaro("dixon", "dicksonx")[1] == 0
 #assert jaro("xabcdxxxxxx", "yaybycydyyyyyy")[1] == 0
 
-
-def generateur_test():
-    alphabet = string.ascii_lowercase
-    for _ in range(100):
-        len_random1 = random.randint(4, 15)
-        len_random2 = random.randint(4, 15)
-        mot1 = "".join([random.choice(alphabet) for i in range(len_random1)])
-        mot2 = "".join([random.choice(alphabet) for i in range(len_random2)])
-        print(jaro(mot1, mot2)[2], distance(mot1, mot2), sep=" et ")
+# def generateur_test():
+#     alphabet = string.ascii_lowercase
+#     for _ in range(100):
+#         len_random1 = random.randint(4, 15)
+#         len_random2 = random.randint(4, 15)
+#         mot1 = "".join([random.choice(alphabet) for i in range(len_random1)])
+#         mot2 = "".join([random.choice(alphabet) for i in range(len_random2)])
+#         
 
 
 def jaro2(mot1: str, mot2: str, p=0.1) -> float:
@@ -130,7 +127,7 @@ def closest_word(mot1: str, lexique: list) -> list:
             liste.append((i, jaro(mot1, lexique[i])))
             #print(f"{mot1} et {lexique[i]}")
         except:
-            print(f"erreur entre {mot1} et {lexique[i]}")
+         #   print(f"erreur entre {mot1} et {lexique[i]}")
             continue
     # On trie la liste précédemnt créee mais en triant sur les distances
     # Donc le 2eme element de chaque tuple de la liste.
@@ -141,7 +138,7 @@ def closest_word(mot1: str, lexique: list) -> list:
     # et on renvoi les mots du lexique correspondant
 
 
-    return [lexique[i[0]] for i in liste]
+    return [lexique[i[0]]  for i in liste]
 
 
 def correcteur(phrase, lexique: list, auto: bool = False) -> str:
@@ -155,14 +152,15 @@ def correcteur(phrase, lexique: list, auto: bool = False) -> str:
         for i in range(len(phrase)):
             # Si le mot n'est pas dans le lexique
             if check_word(lexique, phrase[i]) is False:
-                choix = closest_word(phrase[i], lexique)
+                choix = closest_word(phrase[i], lexique)+[phrase[i]]
+                print("choisir le mot grâce à son indice")
                 while True:  # tant que le input n'est pas bon
                     try:
                         print(f"{phrase[i]}->{choix}")
                         indice = int(input("indice: "))
                         phrase[i] = choix[indice]
                     except IndexError:
-                        print("L'indice doit être compris entre 0 et 4")
+                        print("L'indice doit être compris entre 0 et 5")
                         continue
                     except ValueError:
                         print("L'indice doit être un int ")
@@ -219,8 +217,24 @@ def main():
         gestion_lexique(lexique)
     phrase = input("Phrase à corriger:\n")
     print(correcteur(phrase, lexique))
+    
+# `bonjeur` -> `bonheur`, `bonjour`, `boxeur`
+#bonheur: m=6 t=0
+#bonjour: m=6 t=0
+#bonjeur: m=5 t=0
+# `tabble` -> `table`, `tables`, `tableau`
+#table:  m=5 t=0
+#tables: m=5 t=0
+#taleau: m=5 t=0
+# `plenchet` -> `penche`, `planche`, `plancher`
+#penche: m=6 t=0
+#planche: m=7 t=0
+#plancher: m=6 t=0
+
+#assert closest_word("plenchet",load_lexicon("lexicon.txt"))[:3]==['penche', 'planche', 'plancher']
+#assert closest_word("tabble",load_lexicon("lexicon.txt"))[:3]==['table', 'tables', 'tableau']
+#assert closest_word("bonjeur",load_lexicon("lexicon.txt"))[:3]==['bonheur', 'bonjour', 'boxeur']
 
 
-if __name__ == "__main__":
-    main()
-  
+
+
