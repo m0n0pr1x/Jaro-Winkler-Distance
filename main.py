@@ -1,5 +1,4 @@
-import math
-import string
+from math import floor
 
 def load_lexicon(path: str = "lexicon.txt", mode: str = "r") -> list:
     """
@@ -37,67 +36,96 @@ def len_prefixe(mot1: str, mot2: str) -> int:
     return total
 
 
-def jaro(mot1, mot2):
-    # Determination de m
-    liste_mot = []
-    formule = math.floor(max(len(mot1), len(mot2)) / 2) - 1
 
-    check_mot1 = [False] * len(mot1)# On veut éviter de compter 2 fois les mêmes élements
-    for i in range(len(mot1)):
-        for j in range(len(mot2)):
-            #print(mot1[i],mot2[j],check_mot1)
-            if mot1[i] == mot2[j] and abs(i - j) <= formule and check_mot1[i] == False:
-                liste_mot.append(mot1[i])
-                check_mot1[i] = True
+def jaro_distance(mot1:str,mot2:str)->float:
+    """
+    Calcul la distance de jaro entre 2 mots
+    """
+    
+    formule = floor(max(len(mot1), len(mot2)) / 2) - 1
+    #Compteur de caractères correspondants
+    m=0
+    #Compteur de transpositions
+    t=0
+
+    #Cette liste qu'on va faire évoluer va nous permettre de compter le nombre de
+    #transpositions par la suite
+    check_mot1 = [0 for i in range(len(mot1))]
+    index_mot1=0
+    
+    #Cette liste qu'on va faire évoluer va nous permettre de compter le nombre de
+    #transpositions par la suite mais va aussi nous permettre de ne pas recompter les mêmes
+    #lettres
+    check_mot2 = [0 for i in range(len(mot2))]
+    index_mot2=0
+    
+    while index_mot1 < len(mot1):
+        #On commence par le premier mot
+        index_mot2=0
+        while index_mot2 < len(mot2):
+            #Si les 2 mots sont égaux et qu'ils sont compris dans une fenetre d'indices
+            #définie par formule et que la lettre n'a pas déja était compté dans le mot2 alors
+            if mot1[index_mot1] == mot2[index_mot2] and abs(index_mot1 - index_mot2) <= formule and check_mot2[index_mot2] == 0:
+                #On note l'emplacement dans le mot1
+                check_mot1[index_mot1] =1
+                #On note l'emplacement dans le mot2
+                check_mot2[index_mot2] =1
+                #On ajoute un caractère correspondant
+                m+=1
+                #On passe a la lettre suivante
+                break
             
-
-    # Transpositions
-    liste_mot_mot1 = []
-    liste_mot_mot2 = []
-    for i in mot1:
-        if i in liste_mot:# and not(i in liste_mot_mot1):
-            liste_mot_mot1.append(i)
-
-    for i in mot2:
-        if i in liste_mot:#: and not(i in liste_mot_mot2):
-            liste_mot_mot2.append(i)
+            #Sinon on continu à avancer dans le mot2  
+            else:
+                index_mot2+=1
+        index_mot1+=1
+        
+    #---------------------------------------------------
+    #On réinitialise nos index
+    index_mot1=0
+    index_mot2=0
+    #On possède 2 listes, check_mot1 et check_mot2, qui nous indiquent quand un
+    #caractère est présent avec un 1 et absent avec un 0
+    while index_mot1 < len(mot1):
+        
+        #Si on ne trouve pas un caractere correspondant dans check_mot1
+        #On passe au caractere suivant de mot1
+        if check_mot1[index_mot1] == 0:
+            index_mot1+=1
+            continue # si on est pas au bon indice on recommence
+        
+        elif check_mot1[index_mot1]==1:
+            #On a trouve un element dans mot1 qui est aussi dans mot2
+            #Maintenant on cherche a savoir si ils sont dans le bon ordre
             
-
+            #On parcours donc mot2 (la ou on s'est arreté)
+            for j in range(index_mot2,len(mot2)):
+                #Une fois qu'on trouve un nombre à 1 danc check_mot2 (qui nous indique donc
+                #un caractere présent dans les 2 listes) on chercher a savoir si l'indice de
+                #ce 1, donc lindice de la lettre correspondante dans mot2 est la meme que
+                #la lettre presente dans mot1
+                if check_mot2[index_mot2]==1 and mot1[index_mot1]!=mot2[index_mot2]:
+                    #Si non il ya transposition
+                    index_mot2+=1
+                    t+=1
+                    break
+                elif check_mot2[index_mot2]==1 and mot1[index_mot1]==mot2[index_mot2]:
+                    #Si oui il ny a pas de transposition tout est dans l'ordre
+                    index_mot2+=1
+                    break
+                elif check_mot2[index_mot2]==0:
+                    #On continue tant qu'on ne trouve pas un élément dans check_mot2
+                    index_mot2+=1
+                    continue
+            index_mot1+=1
             
-    m=min(len(liste_mot_mot1),len(liste_mot_mot2))# On prend le minimum pour éviter les erreurs d'indices
-    t = 0
-    for i in range(m):
-        if (
-            liste_mot_mot1[i] != liste_mot_mot2[i]
-        ): 
-            t += 1
+    if m==0:return 0 #pour eviter les divisions par 0
+    if mot1==mot2:return 1 # les 2 mots sont identiques
+    return 1 / 3 * (m / len(mot1) + m / len(mot2) + (m - t // 2) / m) 
 
 
-    #return liste_mot_mot1,liste_mot_mot2,liste_mot,m,t//2
-    if m == 0:
-        return 0
-    #print(f"1 / 3 * ({m} / {len(mot1)} + {m} / {len(mot2)} + ({m} - {t//2}) / {m})")
-    return 1 / 3 * (m / len(mot1) + m / len(mot2) + (m - t // 2) / m)
 
-
-#assert jaro("bien", "bienvenu")[1] == 0
-#assert jaro("bien", "bienvenue")[1] == 0
-#assert jaro("cant", "chaton")[1] == 0
-#assert jaro("duane", "dwayne")[1] == 0
-#assert jaro("dixon", "dicksonx")[1] == 0
-#assert jaro("xabcdxxxxxx", "yaybycydyyyyyy")[1] == 0
-
-# def generateur_test():
-#     alphabet = string.ascii_lowercase
-#     for _ in range(100):
-#         len_random1 = random.randint(4, 15)
-#         len_random2 = random.randint(4, 15)
-#         mot1 = "".join([random.choice(alphabet) for i in range(len_random1)])
-#         mot2 = "".join([random.choice(alphabet) for i in range(len_random2)])
-#         
-
-
-def jaro2(mot1: str, mot2: str, p=0.1) -> float:
+def jaro_distance_V2(mot1: str, mot2: str, p=0.1) -> float:
     """
     Calcul la distance de jaro entre 2 mots
     Version améliorée d'après wikipédia
@@ -106,10 +134,10 @@ def jaro2(mot1: str, mot2: str, p=0.1) -> float:
     mot2 = mot2.lower()
     l = len_prefixe(mot1, mot2)
     #print(
-      #  f"{jaro(mot1, mot2)} + ({ l } * { p }* {(1 -jaro(mot1,mot2))})"
+      #  f"{jaro_distance(mot1, mot2)} + ({ l } * { p }* {(1 -jaro_distance(mot1,mot2))})"
     #)
 
-    return jaro(mot1, mot2) + (l * p * (1 - jaro(mot1, mot2)))
+    return jaro_distance(mot1, mot2) + (l * p * (1 - jaro_distance(mot1, mot2)))
 
 
 def closest_word(mot1: str, lexique: list) -> list:
@@ -124,10 +152,10 @@ def closest_word(mot1: str, lexique: list) -> list:
     # en paramètre.
     for i in range(len(lexique)):
         try:
-            liste.append((i, jaro(mot1, lexique[i])))
+            liste.append((i, jaro_distance(mot1, lexique[i])))
             #print(f"{mot1} et {lexique[i]}")
         except:
-         #   print(f"erreur entre {mot1} et {lexique[i]}")
+            print(f"erreur entre {mot1} et {lexique[i]}")
             continue
     # On trie la liste précédemnt créee mais en triant sur les distances
     # Donc le 2eme element de chaque tuple de la liste.
@@ -140,8 +168,15 @@ def closest_word(mot1: str, lexique: list) -> list:
 
     return [lexique[i[0]]  for i in liste]
 
+def closest_word_oneliner(mot1,lexique):
+    return list(map(lambda cpl:lexique[cpl[1]],sorted(list(map(lambda x:(jaro_distance(mot1,x[1]),x[0]),enumerate(lexique))),key=lambda x:x[0],reverse=True)))[:5]#waw
 
-def correcteur(phrase, lexique: list, auto: bool = False) -> str:
+
+def correcteur(phrase:str, lexique: list, auto: bool = False) -> str:
+    """
+    Correcteur qui interagit directement avec l'utilisateur
+    Idiot-proof
+    """
     phrase = phrase.split()
     if auto is True:
         for i in range(len(phrase)):
@@ -174,6 +209,11 @@ def correcteur(phrase, lexique: list, auto: bool = False) -> str:
 
 
 def gestion_lexique(lexique: list, path: str = "lexicon.txt"):
+    """
+    Prend en charge l'ajout et la suppression de mots dans le lexique
+    Interaction directe avec l'utilisateur
+    idiot-proof
+    """
     print('Vous pouvez soit supprimer soit ajouter un mot')
     print('Pour supprimez tapez  0')
     print('Pour ajoutez tapez 1')
@@ -218,23 +258,118 @@ def main():
     phrase = input("Phrase à corriger:\n")
     print(correcteur(phrase, lexique))
     
-# `bonjeur` -> `bonheur`, `bonjour`, `boxeur`
-#bonheur: m=6 t=0
-#bonjour: m=6 t=0
-#bonjeur: m=5 t=0
-# `tabble` -> `table`, `tables`, `tableau`
-#table:  m=5 t=0
-#tables: m=5 t=0
-#taleau: m=5 t=0
-# `plenchet` -> `penche`, `planche`, `plancher`
-#penche: m=6 t=0
-#planche: m=7 t=0
-#plancher: m=6 t=0
+    
+if __name__=='__main__':
+    main()
+    
+#----------------------------------------------------------------------------
+#DEBUG
 
-#assert closest_word("plenchet",load_lexicon("lexicon.txt"))[:3]==['penche', 'planche', 'plancher']
-#assert closest_word("tabble",load_lexicon("lexicon.txt"))[:3]==['table', 'tables', 'tableau']
-#assert closest_word("bonjeur",load_lexicon("lexicon.txt"))[:3]==['bonheur', 'bonjour', 'boxeur']
+def _transposition(mot1,mot2):
+    """
+    Fonction _transposition debug
+    """
+    formule = floor(max(len(mot1), len(mot2)) / 2) - 1
+    check_mot1 = [0 for i in range(len(mot1))]
+    index_mot1=0
+    index_mot2=0
+    check_mot2 = [0 for i in range(len(mot2))]
+    while index_mot1 < len(mot1):
+        index_mot2=0
+        while index_mot2 < len(mot2):
+            if mot1[index_mot1] == mot2[index_mot2] and abs(index_mot1 - index_mot2) <= formule and check_mot2[index_mot2] == 0:
+                check_mot1[index_mot1] =1
+                check_mot2[index_mot2] =1
+                break
+            else:
+                index_mot2+=1
+        index_mot1+=1
+        
+    t=0
+    index_mot1=0
+    index_mot2=0
+    while index_mot1 < len(mot1):
+        if check_mot1[index_mot1] == 0:
+            index_mot1+=1
+            continue 
+        elif check_mot1[index_mot1]==1:
+            for j in range(index_mot2,len(mot2)):
+                if check_mot2[index_mot2]==1 and mot1[index_mot1]!=mot2[index_mot2]:
+                    index_mot2+=1
+                    t+=1
+                    break
+                elif check_mot2[index_mot2]==1 and mot1[index_mot1]==mot2[index_mot2]:
+                    index_mot2+=1
+                    break
+                elif check_mot2[index_mot2]==0:
+                    index_mot2+=1
+                    continue
+            index_mot1+=1
+            
+    return t
+
+def _caractere(mot1,mot2):
+    """
+    fonction caractere debug
+    """
+    formule = floor(max(len(mot1), len(mot2)) / 2) - 1
+    index_mot1=0
+    index_mot2=0
+    m=0
+    check_mot2 = [0 for i in range(len(mot2))]
+    while index_mot1 < len(mot1):
+        index_mot2=0
+        while index_mot2 < len(mot2):
+            if mot1[index_mot1] == mot2[index_mot2] and abs(index_mot1 - index_mot2) <= formule and check_mot2[index_mot2] == 0:
+                m+=1
+                check_mot2[index_mot2]=1
+                break
+            else:
+                index_mot2+=1
+        index_mot1+=1
+    return m
 
 
+def check():
+    try:
+        assert _caractere("plenchet","penche")==6
+        assert _caractere("plenchet","planche")==6
+        assert _caractere("plenchet","plancher")==6
+        assert _caractere("penche","plenchet")==6
+        assert _caractere("planche","plenchet")==6
+        assert _caractere("plancher","plenchet")==6
 
+        
+        assert _caractere("bonjeur","bonheur")==6
+        assert _caractere("bonjeur","bonjour")==6
+        assert _caractere("bonjeur","boxeur")==5
+        assert _caractere("bonheur","bonjeur")==6
+        assert _caractere("bonjour","bonjeur")==6
+        assert _caractere("boxeur","bonjeur")==5
 
+        assert _caractere("tabble","table")==5
+        assert _caractere("tabble","tables")==5
+        assert _caractere("tabble","tableau")==5
+        assert _caractere("table","tabble")==5
+        assert _caractere("tables","tabble")==5
+        assert _caractere("tableau","tabble")==5
+
+        
+        assert _transposition("plenchet","penche")==0
+        assert _transposition("plenchet","planche")==0
+        assert _transposition("plenchet","plancher")==0
+
+        assert _transposition("bonjeur","bonheur")==0
+        assert _transposition("bonjeur","bonjour")==0
+        assert _transposition("bonjeur","boxeur")==0
+
+        assert _transposition("tabble","table")==0
+        assert _transposition("tabble","tables")==0
+        assert _transposition("tabble","tableau")==0
+
+        assert closest_word("plenchet",load_lexicon("lexicon.txt")) == ['penche', 'planche', 'plancher', 'pleine', 'blanche']
+        assert closest_word("tabble",load_lexicon("lexicon.txt")) == ['table', 'tables', 'tableau', 'bible', 'sable']
+        assert closest_word("bonjeur",load_lexicon("lexicon.txt")) == ['bonheur', 'bonjour', 'boxeur', 'bon', 'honneur']
+        return "kek"
+    except AssertionError:
+        return "too bad"
