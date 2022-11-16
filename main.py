@@ -41,7 +41,7 @@ def jaro_distance(mot1:str,mot2:str)->float:
     """
     Calcul la distance de jaro entre 2 mots
     """
-    
+
     formule = floor(max(len(mot1), len(mot2)) / 2) - 1
     #Compteur de caractères correspondants
     m=0
@@ -52,13 +52,13 @@ def jaro_distance(mot1:str,mot2:str)->float:
     #transpositions par la suite
     check_mot1 = [0 for i in range(len(mot1))]
     index_mot1=0
-    
+
     #Cette liste qu'on va faire évoluer va nous permettre de compter le nombre de
     #transpositions par la suite mais va aussi nous permettre de ne pas recompter les mêmes
     #lettres
     check_mot2 = [0 for i in range(len(mot2))]
     index_mot2=0
-    
+
     while index_mot1 < len(mot1):
         #On commence par le premier mot
         index_mot2=0
@@ -74,12 +74,12 @@ def jaro_distance(mot1:str,mot2:str)->float:
                 m+=1
                 #On passe a la lettre suivante
                 break
-            
-            #Sinon on continu à avancer dans le mot2  
+
+            #Sinon on continu à avancer dans le mot2
             else:
                 index_mot2+=1
         index_mot1+=1
-        
+
     #---------------------------------------------------
     #On réinitialise nos index
     index_mot1=0
@@ -87,17 +87,17 @@ def jaro_distance(mot1:str,mot2:str)->float:
     #On possède 2 listes, check_mot1 et check_mot2, qui nous indiquent quand un
     #caractère est présent avec un 1 et absent avec un 0
     while index_mot1 < len(mot1):
-        
+
         #Si on ne trouve pas un caractere correspondant dans check_mot1
         #On passe au caractere suivant de mot1
         if check_mot1[index_mot1] == 0:
             index_mot1+=1
             continue # si on est pas au bon indice on recommence
-        
+
         elif check_mot1[index_mot1]==1:
             #On a trouve un element dans mot1 qui est aussi dans mot2
             #Maintenant on cherche a savoir si ils sont dans le bon ordre
-            
+
             #On parcours donc mot2 (la ou on s'est arreté)
             for j in range(index_mot2,len(mot2)):
                 #Une fois qu'on trouve un nombre à 1 danc check_mot2 (qui nous indique donc
@@ -118,10 +118,10 @@ def jaro_distance(mot1:str,mot2:str)->float:
                     index_mot2+=1
                     continue
             index_mot1+=1
-            
+
     if m==0:return 0 #pour eviter les divisions par 0
     if mot1==mot2:return 1 # les 2 mots sont identiques
-    return 1 / 3 * (m / len(mot1) + m / len(mot2) + (m - t // 2) / m) 
+    return 1 / 3 * (m / len(mot1) + m / len(mot2) + (m - t // 2) / m)
 
 
 
@@ -257,11 +257,11 @@ def main():
         gestion_lexique(lexique)
     phrase = input("Phrase à corriger:\n")
     print(correcteur(phrase, lexique))
-    
-    
+
+
 if __name__=='__main__':
     main()
-    
+
 #----------------------------------------------------------------------------
 #DEBUG
 
@@ -284,14 +284,14 @@ def _transposition(mot1,mot2):
             else:
                 index_mot2+=1
         index_mot1+=1
-        
+
     t=0
     index_mot1=0
     index_mot2=0
     while index_mot1 < len(mot1):
         if check_mot1[index_mot1] == 0:
             index_mot1+=1
-            continue 
+            continue
         elif check_mot1[index_mot1]==1:
             for j in range(index_mot2,len(mot2)):
                 if check_mot2[index_mot2]==1 and mot1[index_mot1]!=mot2[index_mot2]:
@@ -305,7 +305,7 @@ def _transposition(mot1,mot2):
                     index_mot2+=1
                     continue
             index_mot1+=1
-            
+
     return t
 
 def _caractere(mot1,mot2):
@@ -339,7 +339,7 @@ def check():
         assert _caractere("planche","plenchet")==6
         assert _caractere("plancher","plenchet")==6
 
-        
+
         assert _caractere("bonjeur","bonheur")==6
         assert _caractere("bonjeur","bonjour")==6
         assert _caractere("bonjeur","boxeur")==5
@@ -354,7 +354,7 @@ def check():
         assert _caractere("tables","tabble")==5
         assert _caractere("tableau","tabble")==5
 
-        
+
         assert _transposition("plenchet","penche")==0
         assert _transposition("plenchet","planche")==0
         assert _transposition("plenchet","plancher")==0
