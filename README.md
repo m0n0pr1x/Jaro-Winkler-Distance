@@ -1,4 +1,4 @@
-#Jaro Winkler Distance
+# Jaro Winkler Distance
 
 School project 
 Comments not yet translated
